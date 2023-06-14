@@ -14,13 +14,15 @@
       height: 100vh;
     }
 
-    #container {
+    .container {
+      position: absolute;
       max-width: 600px;
       width: 90%;
       padding: 20px;
       background-color: #f2f2f2;
       border-radius: 10px;
       box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      cursor: move;
     }
 
     #teleprompter {
@@ -55,7 +57,7 @@
 </head>
 
 <body>
-  <div id="container">
+  <div class="container">
     <div id="teleprompter"></div>
 
     <div class="controls">
@@ -98,8 +100,29 @@
       socket.emit('updateText', text);
     });
 
+    let isDragging = false;
+    let dragStartX;
+    let dragStartY;
+    const container = document.querySelector('.container');
+
+    container.addEventListener('mousedown', (e) => {
+      isDragging = true;
+      dragStartX = e.clientX - container.offsetLeft;
+      dragStartY = e.clientY - container.offsetTop;
+    });
+
+    document.addEventListener('mousemove', (e) => {
+      if (isDragging) {
+        container.style.left = `${e.clientX - dragStartX}px`;
+        container.style.top = `${e.clientY - dragStartY}px`;
+      }
+    });
+
+    document.addEventListener('mouseup', () => {
+      isDragging = false;
+    });
+
     function startScrolling() {
-      const container = document.getElementById('container');
       const containerHeight = container.clientHeight;
       const contentHeight = teleprompter.clientHeight;
 
