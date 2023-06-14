@@ -1,0 +1,28 @@
+{
+  "name": "teleprompter",
+  "version": "1.0.0",
+  "description": "Teleprompter",
+  "main": "index.js",
+  "scripts": {
+    "test": "teleprompter"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+ssh://git@github.com/reagan-lopez/teleprompter.git"
+  },
+  "keywords": [
+    "teleprompter",
+    "node",
+    "nodejs"
+  ],
+  "author": "Reagan Lopez",
+  "license": "Apache-2.0",
+  "bugs": {
+    "url": "https://github.com/reagan-lopez/teleprompter/issues"
+  },
+  "homepage": "https://github.com/reagan-lopez/teleprompter#readme",
+  "dependencies": {
+    "express": "^4.18.2",
+    "socket.io": "^4.6.2"
+  }
+}

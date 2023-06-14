@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <title>Teleprompter</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+
+    #container {
+      max-width: 600px;
+      width: 90%;
+      padding: 20px;
+      background-color: #f2f2f2;
+      border-radius: 10px;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+
+    #teleprompter {
+      min-height: 200px;
+      max-height: 400px;
+      overflow: hidden;
+      padding: 10px;
+      font-size: 20px;
+      border: 1px solid #ccc;
+      margin-bottom: 10px;
+      transition: transform 0.1s ease-in-out;
+    }
+
+    .controls {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 10px;
+    }
+
+    .controls input[type="range"] {
+      width: 100px;
+      margin-left: 10px;
+    }
+
+    .controls button {
+      padding: 8px 12px;
+      font-size: 14px;
+      cursor: pointer;
+    }
+  </style>
+</head>
+
+<body>
+  <div id="container">
+    <div id="teleprompter"></div>
+
+    <div class="controls">
+      <textarea id="textInput" placeholder="Paste your text here"></textarea>
+    </div>
+
+    <div class="controls">
+      <button id="startButton">Start</button>
+      <button id="stopButton">Stop</button>
+      <input type="range" id="speedInput" min="1" max="10" value="1">
+      <label for="speedInput">Speed</label>
+    </div>
+  </div>
+
+  <script src="/socket.io/socket.io.js"></script>
+  <script>
+    const socket = io();
+    const teleprompter = document.getElementById('teleprompter');
+    let animationFrameId;
+
+    socket.on('textUpdate', function (text) {
+      teleprompter.innerText = text;
+    });
+
+    document.getElementById('startButton').addEventListener('click', () => {
+      startScrolling();
+    });
+
+    document.getElementById('stopButton').addEventListener('click', () => {
+      stopScrolling();
+    });
+
+    document.getElementById('speedInput').addEventListener('change', (e) => {
+      const speed = parseInt(e.target.value);
+      socket.emit('updateSpeed', speed);
+    });
+
+    document.getElementById('textInput').addEventListener('input', (e) => {
+      const text = e.target.value;
+      socket.emit('updateText', text);
+    });
+
+    function startScrolling() {
+      const container = document.getElementById('container');
+      const containerHeight = container.clientHeight;
+      const contentHeight = teleprompter.clientHeight;
+
+      let position = containerHeight;
+      function scroll() {
+        position--;
+        if (position < -contentHeight) {
+          position = containerHeight;
+        }
+        teleprompter.style.transform = `translateY(${position}px)`;
+        animationFrameId = requestAnimationFrame(scroll);
+      }
+
+      scroll();
+    }
+
+    function stopScrolling() {
+      cancelAnimationFrame(animationFrameId);
+    }
+  </script>
+</body>
+
+</html>
