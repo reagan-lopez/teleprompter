@@ -53,6 +53,16 @@
       font-size: 14px;
       cursor: pointer;
     }
+
+    .resize-handle {
+      width: 10px;
+      height: 10px;
+      position: absolute;
+      bottom: 0;
+      right: 0;
+      cursor: nwse-resize;
+      background-color: #000;
+    }
   </style>
 </head>
 
@@ -70,6 +80,7 @@
       <input type="range" id="speedInput" min="1" max="10" value="1">
       <label for="speedInput">Speed (ms)</label>
     </div>
+    <div class="resize-handle" id="resizeHandle"></div>
   </div>
 
   <script src="/socket.io/socket.io.js"></script>
@@ -103,18 +114,33 @@
     });
 
     let isDragging = false;
+    let isResizing = false;
     let dragStartX;
     let dragStartY;
-    const container = document.getElementById('container');
+    let resizeStartX;
+    let resizeStartY;
+    let initialWidth;
+    let initialHeight;
 
-    container.addEventListener('mousedown', (e) => {
-      isDragging = true;
-      dragStartX = e.clientX - container.offsetLeft;
-      dragStartY = e.clientY - container.offsetTop;
+    const container = document.getElementById('container');
+    const resizeHandle = document.getElementById('resizeHandle');
+
+    resizeHandle.addEventListener('mousedown', (e) => {
+      e.stopPropagation();
+      isResizing = true;
+      resizeStartX = e.clientX;
+      resizeStartY = e.clientY;
+      initialWidth = container.offsetWidth;
+      initialHeight = container.offsetHeight;
     });
 
     document.addEventListener('mousemove', (e) => {
-      if (isDragging) {
+      if (isResizing) {
+        const newWidth = initialWidth + (e.clientX - resizeStartX);
+        const newHeight = initialHeight + (e.clientY - resizeStartY);
+        container.style.width = `${newWidth}px`;
+        container.style.height = `${newHeight}px`;
+      } else if (isDragging) {
         container.style.left = `${e.clientX - dragStartX}px`;
         container.style.top = `${e.clientY - dragStartY}px`;
       }
@@ -122,6 +148,14 @@
 
     document.addEventListener('mouseup', () => {
       isDragging = false;
+      isResizing = false;
+    });
+
+    container.addEventListener('mousedown', (e) => {
+      e.stopPropagation();
+      isDragging = true;
+      dragStartX = e.clientX - container.offsetLeft;
+      dragStartY = e.clientY - container.offsetTop;
     });
 
     function startScrolling() {
